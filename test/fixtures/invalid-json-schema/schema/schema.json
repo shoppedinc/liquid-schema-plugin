@@ -1,10 +1,10 @@
 {
-    "name": "index",
-    "settings": [
-        {
-            "label": "Title",
-            "id": "title",
-            "type": "text"
-        }
-    ]
+  "name": "index",
+  "settings": [
+    {
+      "label": "Title",
+      "id": "title",
+      "type": "text"
+    }
+  ]
 };

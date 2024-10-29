@@ -1,4 +1,4 @@
 module.exports = filename => ({
-    name: filename,
-    settings:
+  name: filename,
+  settings:
 })

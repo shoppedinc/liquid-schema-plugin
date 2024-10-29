@@ -4,40 +4,40 @@
   "main": "plugin/index.js",
   "license": "MIT",
   "files": [
-    "plugin"
+  "plugin"
   ],
   "author": {
-    "name": "David Warrington",
-    "url": "https://github.com/davidwarrington"
+  "name": "David Warrington",
+  "url": "https://github.com/davidwarrington"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/davidwarrington/liquid-schema-plugin.git"
+  "type": "git",
+  "url": "git+https://github.com/davidwarrington/liquid-schema-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/davidwarrington/liquid-schema-plugin/issues"
+  "url": "https://github.com/davidwarrington/liquid-schema-plugin/issues"
   },
   "homepage": "https://github.com/davidwarrington/liquid-schema-plugin#readme",
   "keywords": [
-    "liquid",
-    "shopify",
-    "webpack"
+  "liquid",
+  "shopify",
+  "webpack"
   ],
   "dependencies": {
-    "fs-extra": "^8.1.0",
-    "schema-utils": "^2.6.1",
-    "webpack": "^5.17.0",
-    "webpack-sources": "^1.4.3"
+  "fs-extra": "^8.1.0",
+  "schema-utils": "^2.6.1",
+  "webpack": "^5.17.0",
+  "webpack-sources": "^1.4.3"
   },
   "devDependencies": {
-    "@strawberrydigital/eslint-config": "^1.0.0",
-    "eslint": "^7.4.0",
-    "jest": "^25.1.0",
-    "webpack-cli": "^4.4.0"
+  "@strawberrydigital/eslint-config": "^1.0.0",
+  "eslint": "^7.4.0",
+  "jest": "^25.1.0",
+  "webpack-cli": "^4.4.0"
   },
   "scripts": {
-    "lint": "eslint . --ext .js",
-    "test": "jest",
-    "test:watch": "jest --watch"
+  "lint": "eslint . --ext .js",
+  "test": "jest",
+  "test:watch": "jest --watch"
   }
 }

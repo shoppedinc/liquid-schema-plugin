@@ -20,18 +20,18 @@ Add the plugin to `slate.config.js`
 const LiquidSchemaPlugin = require('liquid-schema-plugin');
 
 module.exports = {
-    // ...
-    'webpack.extend': {
-        plugins: [
-            new LiquidSchemaPlugin({
-                from: {
-                    liquid: './src/sections',
-                    schema: './src/schema'
-                },
-                to: './dist/sections'
-            })
-        ]
-    }
+  // ...
+  'webpack.extend': {
+    plugins: [
+      new LiquidSchemaPlugin({
+        from: {
+          liquid: './src/sections',
+          schema: './src/schema'
+        },
+        to: './dist/sections'
+      })
+    ]
+  }
 }
 ```
 
@@ -42,17 +42,17 @@ Add the plugin to `webpack.config.js`
 const LiquidSchemaPlugin = require('liquid-schema-plugin');
 
 module.exports = {
+  // ...
+  plugins: [
     // ...
-    plugins: [
-        // ...
-        new LiquidSchemaPlugin({
-            from: {
-                liquid: './src/sections',
-                schema: './src/schema'
-            },
-            to: './dist/sections'
-        })
-    ]
+    new LiquidSchemaPlugin({
+      from: {
+        liquid: './src/sections',
+        schema: './src/schema'
+      },
+      to: './dist/sections'
+    })
+  ]
 }
 ```
 
@@ -70,8 +70,8 @@ Note: It doesn't require an `endschema` tag.
 const banner = require('./components/banner')
 
 module.exports = {
-    name: 'Section',
-    blocks: [banner]
+  name: 'Section',
+  blocks: [banner]
 }
 ```
 
@@ -80,7 +80,7 @@ Alternatively, the schema file can export a function, in which case it takes the
 // section.liquid
 {% schema 'filepath' %}
 {
-    "settings": [...]
+  "settings": [...]
 }
 {% endschema %}
 ```
@@ -90,9 +90,9 @@ Alternatively, the schema file can export a function, in which case it takes the
 const banner = require('./components/banner')
 
 module.exports = (filename, contents) => ({
-    name: filename,
-    settings: contents.settings,
-    blocks: [banner]
+  name: filename,
+  settings: contents.settings,
+  blocks: [banner]
 })
 ```
 
