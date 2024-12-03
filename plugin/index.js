@@ -18,10 +18,7 @@ module.exports = class LiquidSchemaPlugin {
     const isWebpack4 = !compiler.webpack;
 
     if (isWebpack4) {
-      compiler.hooks.emit.tapPromise(
-        PLUGIN_NAME,
-        this.buildSchema.bind(this)
-      );
+      compiler.hooks.emit.tapPromise(PLUGIN_NAME, this.buildSchema.bind(this));
 
       return;
     }
@@ -45,10 +42,7 @@ module.exports = class LiquidSchemaPlugin {
 
     return Promise.all(
       files.map(async file => {
-        const fileLocation = path.resolve(
-          this.options.from.liquid,
-          file
-        );
+        const fileLocation = path.resolve(this.options.from.liquid, file);
         const fileStat = await fs.stat(fileLocation);
 
         if (fileStat.isFile() && path.extname(file) === '.liquid') {
@@ -57,16 +51,11 @@ module.exports = class LiquidSchemaPlugin {
             fileLocation
           );
 
-          const outputKey = this.getOutputKey(
-            fileLocation,
-            compilationOutput
-          );
+          const outputKey = this.getOutputKey(fileLocation, compilationOutput);
 
           try {
             // eslint-disable-next-line no-param-reassign
-            compilation.assets[
-              outputKey
-            ] = await this.replaceSchemaTags(
+            compilation.assets[outputKey] = await this.replaceSchemaTags(
               fileLocation,
               compilation
             );
@@ -90,10 +79,7 @@ module.exports = class LiquidSchemaPlugin {
   }
 
   getOutputKey(liquidSourcePath, compilationOutput) {
-    const fileName = path.relative(
-      this.options.from.liquid,
-      liquidSourcePath
-    );
+    const fileName = path.relative(this.options.from.liquid, liquidSourcePath);
     const relativeOutputPath = path.relative(
       compilationOutput,
       this.options.to
@@ -118,10 +104,7 @@ module.exports = class LiquidSchemaPlugin {
     let [match, importableFilePath, , contents] = fileContents.match(
       replaceableSchemaRegex
     );
-    importableFilePath = importableFilePath.replace(
-      /(^('|"))|(('|")$)/g,
-      ''
-    );
+    importableFilePath = importableFilePath.replace(/(^('|"))|(('|")$)/g, '');
     importableFilePath = path.resolve(
       this.options.from.schema,
       importableFilePath
