@@ -98,11 +98,10 @@ module.exports = class LiquidSchemaPlugin {
       return new RawSource(fileContents);
     }
 
-    let importableFilePath = `section-${fileName}.js`;
-    importableFilePath = importableFilePath.replace(/(^('|"))|(('|")$)/g, '');
-    importableFilePath = path.resolve(
+    const importableFileName = `section-${fileName}.js`;
+    const importableFilePath = path.resolve(
       this.options.from.schema,
-      importableFilePath
+      importableFileName
     );
 
     if (!fs.existsSync(importableFilePath)) {
@@ -137,7 +136,14 @@ module.exports = class LiquidSchemaPlugin {
       ].join('\n');
     }
 
-    const fileContentsWithSchema = `${fileContents}\n\n{% schema %}\n${JSON.stringify(
+    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${this.options.from.schema}${path.sep}${importableFileName} {% endcomment %}`;
+    const commentRegex = new RegExp(comment, 'i');
+
+    if (!commentRegex.test(fileLocation)) {
+      fs.appendFileSync(fileLocation, `\n${comment}\n`);
+    }
+
+    const fileContentsWithSchema = `${fileContents}\n{% schema %}\n${JSON.stringify(
       schema,
       null,
       2
