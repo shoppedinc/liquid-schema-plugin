@@ -136,22 +136,27 @@ module.exports = class LiquidSchemaPlugin {
       ].join('\n');
     }
 
-    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${this.options.from.schema.replace(
-      path.sep,
-      '/'
-    )}/${importableFileName} {% endcomment %}`;
+    const relativePathString = `./${path.relative(
+      path.resolve(process.cwd()),
+      path.resolve(__dirname, importableFilePath)
+    )}`;
+    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${relativePathString} {% endcomment %}`;
     const commentRegex = new RegExp(comment, 'i');
+    const hasComment = commentRegex.test(fileContents);
 
-    if (!commentRegex.test(fileContents)) {
+    if (!hasComment) {
       fs.appendFileSync(fileLocation, `\n${comment}\n`);
     }
 
-    const fileContentsWithSchema = `${fileContents}\n{% schema %}\n${JSON.stringify(
+    const schemaString = `{% schema %}\n${JSON.stringify(
       schema,
       null,
       2
     )}\n{% endschema %}`;
 
+    const fileContentsWithSchema = hasComment
+      ? `${fileContents}\n${schemaString}`
+      : `${fileContents}\n${comment}\n\n${schemaString}`;
     return new RawSource(fileContentsWithSchema);
   }
 };
