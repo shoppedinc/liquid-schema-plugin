@@ -136,10 +136,13 @@ module.exports = class LiquidSchemaPlugin {
       ].join('\n');
     }
 
-    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${this.options.from.schema}${path.sep}${importableFileName} {% endcomment %}`;
+    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${this.options.from.schema.replace(
+      path.sep,
+      '/'
+    )}/${importableFileName} {% endcomment %}`;
     const commentRegex = new RegExp(comment, 'i');
 
-    if (!commentRegex.test(fileLocation)) {
+    if (!commentRegex.test(fileContents)) {
       fs.appendFileSync(fileLocation, `\n${comment}\n`);
     }
 
