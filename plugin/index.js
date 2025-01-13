@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const path = require('path');
 const validate = require('schema-utils');
 const { RawSource } = require('webpack-sources');
-const { asString } = require('webpack').Template;
 
 const optionsSchema = require('./schema');
 
@@ -18,10 +17,7 @@ module.exports = class LiquidSchemaPlugin {
     const isWebpack4 = !compiler.webpack;
 
     if (isWebpack4) {
-      compiler.hooks.emit.tapPromise(
-        PLUGIN_NAME,
-        this.buildSchema.bind(this)
-      );
+      compiler.hooks.emit.tapPromise(PLUGIN_NAME, this.buildSchema.bind(this));
 
       return;
     }
@@ -45,10 +41,7 @@ module.exports = class LiquidSchemaPlugin {
 
     return Promise.all(
       files.map(async file => {
-        const fileLocation = path.resolve(
-          this.options.from.liquid,
-          file
-        );
+        const fileLocation = path.resolve(this.options.from.liquid, file);
         const fileStat = await fs.stat(fileLocation);
 
         if (fileStat.isFile() && path.extname(file) === '.liquid') {
@@ -57,16 +50,11 @@ module.exports = class LiquidSchemaPlugin {
             fileLocation
           );
 
-          const outputKey = this.getOutputKey(
-            fileLocation,
-            compilationOutput
-          );
+          const outputKey = this.getOutputKey(fileLocation, compilationOutput);
 
           try {
             // eslint-disable-next-line no-param-reassign
-            compilation.assets[
-              outputKey
-            ] = await this.replaceSchemaTags(
+            compilation.assets[outputKey] = await this.compileSchemaTags(
               fileLocation,
               compilation
             );
@@ -90,10 +78,7 @@ module.exports = class LiquidSchemaPlugin {
   }
 
   getOutputKey(liquidSourcePath, compilationOutput) {
-    const fileName = path.relative(
-      this.options.from.liquid,
-      liquidSourcePath
-    );
+    const fileName = path.relative(this.options.from.liquid, liquidSourcePath);
     const relativeOutputPath = path.relative(
       compilationOutput,
       this.options.to
@@ -102,30 +87,26 @@ module.exports = class LiquidSchemaPlugin {
     return path.join(relativeOutputPath, fileName);
   }
 
-  async replaceSchemaTags(fileLocation, compilation) {
+  async compileSchemaTags(fileLocation, compilation) {
     const fileName = path.basename(fileLocation, '.liquid');
     const fileContents = await fs.readFile(fileLocation, 'utf-8');
-    const replaceableSchemaRegex = /{%-?\s*schema\s*('.*'|".*")\s*-?%}(([\s\S]*){%-?\s*endschema\s*-?%})?/;
-    const fileContainsReplaceableSchemaRegex = replaceableSchemaRegex.test(
-      fileContents
-    );
 
-    if (!fileContainsReplaceableSchemaRegex) {
+    const schemaRegex = /{%-?\s*schema\s*('.*'|".*")\s*-?%}(([\s\S]*){%-?\s*endschema\s*-?%})?/;
+    const fileContainsSchema = schemaRegex.test(fileContents);
+
+    if (fileContainsSchema) {
       return new RawSource(fileContents);
     }
 
-    // eslint-disable-next-line prefer-const
-    let [match, importableFilePath, , contents] = fileContents.match(
-      replaceableSchemaRegex
-    );
-    importableFilePath = importableFilePath.replace(
-      /(^('|"))|(('|")$)/g,
-      ''
-    );
-    importableFilePath = path.resolve(
+    const importableFileName = `section-${fileName}.js`;
+    const importableFilePath = path.resolve(
       this.options.from.schema,
-      importableFilePath
+      importableFileName
     );
+
+    if (!fs.existsSync(importableFilePath)) {
+      return new RawSource(fileContents);
+    }
 
     compilation.fileDependencies.add(require.resolve(importableFilePath));
 
@@ -135,22 +116,15 @@ module.exports = class LiquidSchemaPlugin {
       importedSchema = require(importableFilePath);
     } catch (error) {
       throw [
-        match,
         '^',
         `    File to import not found or unreadable: ${importableFilePath}`,
         `    in ${fileLocation}`,
       ].join('\n');
     }
 
-    try {
-      contents = JSON.parse(contents);
-    } catch (error) {
-      contents = null;
-    }
-
     let schema = importedSchema;
     if (typeof importedSchema === 'function') {
-      schema = importedSchema(fileName, contents);
+      schema = importedSchema(fileName);
     }
 
     if (typeof schema !== 'object') {
@@ -162,15 +136,27 @@ module.exports = class LiquidSchemaPlugin {
       ].join('\n');
     }
 
-    return new RawSource(
-      fileContents.replace(
-        replaceableSchemaRegex,
-        asString([
-          '{% schema %}',
-          JSON.stringify(schema, null, 2),
-          '{% endschema %}',
-        ])
-      )
-    );
+    const relativePathString = `./${path.relative(
+      path.resolve(process.cwd()),
+      path.resolve(__dirname, importableFilePath)
+    )}`;
+    const comment = `{% comment %} Schema compiled by Liquid Schema Plugin from ${relativePathString} {% endcomment %}`;
+    const commentRegex = new RegExp(comment, 'i');
+    const hasComment = commentRegex.test(fileContents);
+
+    if (!hasComment) {
+      fs.appendFileSync(fileLocation, `\n${comment}\n`);
+    }
+
+    const schemaString = `{% schema %}\n${JSON.stringify(
+      schema,
+      null,
+      2
+    )}\n{% endschema %}`;
+
+    const fileContentsWithSchema = hasComment
+      ? `${fileContents}\n${schemaString}`
+      : `${fileContents}\n${comment}\n\n${schemaString}`;
+    return new RawSource(fileContentsWithSchema);
   }
 };
