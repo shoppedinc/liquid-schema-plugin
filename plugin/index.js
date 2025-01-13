@@ -16,7 +16,7 @@ function LiquidSchemaPlugin(opts = {}) {
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       compilation.hooks.processAssets.tapPromise(
         PLUGIN_NAME,
-        this.buildSchema.bind(this, compilation)
+        buildSchema.bind(this, compilation)
       );
     });
   }
@@ -41,10 +41,10 @@ function LiquidSchemaPlugin(opts = {}) {
             fileLocation
           );
 
-          const outputKey = this.getOutputKey(fileLocation, compilationOutput);
+          const outputKey = getOutputKey(fileLocation, compilationOutput);
           try {
             // eslint-disable-next-line no-param-reassign
-            compilation.assets[outputKey] = await this.replaceSchemaTags(
+            compilation.assets[outputKey] = await replaceSchemaTags(
               fileLocation,
               compilation
             );
